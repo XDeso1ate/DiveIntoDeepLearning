@@ -69,4 +69,54 @@ def show_fashion_mnist(images, labels):
         f.axes.get_yaxis().set_visible(False)
     plt.show()
 
+def load_data_fashion_mnist(batch_size,root="~/Datasets/FashionMNIST"):
+    transform = transforms.ToTensor();
+    mnist_train = torchvision.datasets.FashionMNIST(root='~/Datasets/FashionMNIST',train=True,download=True,
+                                       transform=transforms.ToTensor())
+    mnist_test = torchvision.datasets.FashionMNIST(root='~/Datasets/FashionMNIST',train=False,download=True,
+                                       transform=transforms.ToTensor())
+    if sys.platform.startswith('win'):
+        num_workers = 0
+    else:
+        num_workers = 4
 
+    train_iter = torch.utils.data.DataLoader(mnist_train,batch_size=batch_size,
+                                    shuffle=True,num_workers=num_workers)
+    test_iter = torch.utils.data.DataLoader(mnist_test,batch_size=batch_size,
+                                    shuffle=False,num_workers = num_workers)
+    return train_iter,test_iter
+
+def train_ch3(net,train_iter,test_iter,loss,num_epochs,batch_size,
+             params=None,lr=None,optimizer = None):
+    for epoch in range(num_epochs):
+        train_l_sum,train_acc_sum = 0.0,0.0
+        n = 0
+        for X,y in train_iter:
+            y_hat = net(X)
+            l = loss(y_hat,y).sum()
+            
+            #梯度清零
+            if optimizer is not None:
+                optimizer.zero_grad()
+            elif params is not None and params[0].grad is not None:
+                for param in params:
+                    param.grad.data.zero_()
+            l.backward()
+            if optimizer is None:
+                d2l.sgd(params, lr, batch_size)
+            else:
+                optimizer.step()
+            train_l_sum += l.item()
+            train_acc_sum += (y_hat.argmax(dim=1) == y).sum().item()
+            n += y.shape[0]
+        test_acc = evaluate_accuracy(test_iter, net)
+        print('epoch %d, loss %.4f, train acc %.3f, test acc %.3f'
+                % (epoch + 1, train_l_sum / n, train_acc_sum / n,test_acc))
+        
+#计算分类准确率
+def evaluate_accuracy(data_iter, net):
+    acc_sum, n = 0.0, 0
+    for X, y in data_iter:
+        acc_sum += (net(X).argmax(dim=1) == y).float().sum().item()
+        n += y.shape[0]
+    return acc_sum / n
