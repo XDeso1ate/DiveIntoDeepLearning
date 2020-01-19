@@ -120,3 +120,9 @@ def evaluate_accuracy(data_iter, net):
         acc_sum += (net(X).argmax(dim=1) == y).float().sum().item()
         n += y.shape[0]
     return acc_sum / n
+
+class FlattenLayer(nn.Module):
+    def __init__(self):
+        super(FlattenLayer,self).__init__()
+    def forward(self,x):
+        return x.view(x.shape[0],-1)#256*1*28*28 ——> 256 * 784
