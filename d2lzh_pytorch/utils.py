@@ -103,7 +103,7 @@ def train_ch3(net,train_iter,test_iter,loss,num_epochs,batch_size,
                     param.grad.data.zero_()
             l.backward()
             if optimizer is None:
-                d2l.sgd(params, lr, batch_size)
+                sgd(params, lr, batch_size)
             else:
                 optimizer.step()
             train_l_sum += l.item()
