@@ -117,7 +117,18 @@ def train_ch3(net,train_iter,test_iter,loss,num_epochs,batch_size,
 def evaluate_accuracy(data_iter, net):
     acc_sum, n = 0.0, 0
     for X, y in data_iter:
-        acc_sum += (net(X).argmax(dim=1) == y).float().sum().item()
+        if isinstance(net,torch.nn.Module):
+            net.eval()
+            
+            acc_sum += (net(X).argmax(dim=1) == y).float().sum().item()
+            net.train()
+        else:
+            if('is_training' in net.__code__.co_varnames):
+                acc_sum += (net(X, is_training=False).argmax(dim=1)
+                        == y).float().sum().item()
+            else:
+                acc_sum += (net(X).argmax(dim=1) ==
+                           y).float().sum().item()
         n += y.shape[0]
     return acc_sum / n
 
