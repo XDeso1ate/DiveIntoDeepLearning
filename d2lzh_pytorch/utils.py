@@ -114,22 +114,22 @@ def train_ch3(net,train_iter,test_iter,loss,num_epochs,batch_size,
                 % (epoch + 1, train_l_sum / n, train_acc_sum / n,test_acc))
         
 #计算分类准确率
-def evaluate_accuracy(data_iter, net):
+def evaluate_accuracy(data_iter, net,
+           device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')):
     acc_sum, n = 0.0, 0
-    for X, y in data_iter:
-        if isinstance(net,torch.nn.Module):
-            net.eval()
-            
-            acc_sum += (net(X).argmax(dim=1) == y).float().sum().item()
-            net.train()
-        else:
-            if('is_training' in net.__code__.co_varnames):
-                acc_sum += (net(X, is_training=False).argmax(dim=1)
-                        == y).float().sum().item()
-            else:
-                acc_sum += (net(X).argmax(dim=1) ==
-                           y).float().sum().item()
-        n += y.shape[0]
+    with torch.no_grad():
+        for X, y in data_iter:
+            if isinstance(net, torch.nn.Module):
+                net.eval() # 评估模式, 这会关闭dropout
+                acc_sum += (net(X.to(device)).argmax(dim=1) ==y.to(device)).float().sum().cpu().item()
+                net.train() # 改回训练模式
+            else: # 自定义的模型, 3.13节之后不不会⽤用到, 不不考虑GPU
+                if('is_training' in net.__code__.co_varnames): # 如果有is_training这个参数
+                # 将is_training设置成False
+                    acc_sum += (net(X,is_training=False).argmax(dim=1) == y).float().sum().item()
+                else:
+                    acc_sum += (net(X).argmax(dim=1) ==y).float().sum().item()
+            n += y.shape[0]
     return acc_sum / n
 
 class FlattenLayer(nn.Module):
