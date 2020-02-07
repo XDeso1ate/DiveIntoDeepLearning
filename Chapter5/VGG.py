@@ -67,3 +67,11 @@ train_iter, test_iter = d2l.load_data_fashion_mnist(batch_size,resize=224)
 lr, num_epochs = 0.001, 5
 optimizer = torch.optim.Adam(net.parameters(), lr=lr)
 d2l.train_ch5(net, train_iter, test_iter, batch_size, optimizer,device,num_epochs)
+
+'''
+epoch 1, loss 0.5111, train acc 0.813, test acc 0.875, time 1679.6 sec
+epoch 2, loss 0.3344, train acc 0.879, test acc 0.892, time 1671.3 sec
+epoch 3, loss 0.2876, train acc 0.894, test acc 0.899, time 1677.5 sec
+epoch 4, loss 0.2631, train acc 0.905, test acc 0.900, time 1673.8 sec
+epoch 5, loss 0.2446, train acc 0.911, test acc 0.908, time 1666.1 sec
+'''
