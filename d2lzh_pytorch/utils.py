@@ -201,3 +201,9 @@ def load_data_fashion_mnist(batch_size, resize=None, root='~/Datasets/FashionMNI
     test_iter = torch.utils.data.DataLoader(mnist_test, batch_size=batch_size, shuffle=False, num_workers=num_workers)
 
     return train_iter, test_iter
+# ########################### 5.8 ###############################
+class GlobalAvgPool2d(nn.Module):
+    def __init__(self):
+        super(GlobalAvgPool2d,self).__init__()
+    def forward(self,x):
+        return F.avg_pool2d(x,kernel_size=x.size()[2:])
